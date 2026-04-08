@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register</title>
+<style>
+body{background:#0f172a;color:white;text-align:center;font-family:Arial;}
+.box{width:350px;margin:auto;margin-top:100px;background:#1e293b;padding:20px;border-radius:10px;}
+input,button{width:90%;padding:10px;margin:5px;border-radius:5px;border:none;}
+button{background:#22c55e;color:white;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Register</h2>
+
+<input id="user" placeholder="Username">
+<input id="pass" type="password">
+<button onclick="register()">Register</button>
+
+<p><a href="index.html">Login</a></p>
+</div>
+
+<script>
+const API="http://127.0.0.1:5000/api";
+
+function register(){
+fetch(API+"/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+credentials:"include",
+body:JSON.stringify({username:user.value,password:pass.value})
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+window.location="index.html";
+});
+}
+</script>
+
+</body>
+</html>

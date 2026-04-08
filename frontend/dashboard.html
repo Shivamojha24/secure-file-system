@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<style>
+body{background:#0f172a;color:white;text-align:center;font-family:Arial;}
+.box{width:400px;margin:auto;margin-top:50px;background:#1e293b;padding:20px;border-radius:10px;}
+button{padding:10px;margin:5px;border:none;border-radius:5px;background:#3b82f6;color:white;}
+li{background:#334155;margin:5px;padding:8px;border-radius:5px;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Dashboard</h2>
+
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+
+<button onclick="loadFiles()">Load Files</button>
+
+<ul id="list"></ul>
+
+<button onclick="logout()">Logout</button>
+</div>
+
+<script>
+const API="http://127.0.0.1:5000/api";
+
+function upload(){
+let f=document.getElementById("file").files[0];
+let form=new FormData();
+form.append("file",f);
+
+fetch(API+"/upload",{method:"POST",credentials:"include",body:form})
+.then(res=>res.json())
+.then(d=>alert(d.message));
+}
+
+function loadFiles(){
+fetch(API+"/files",{credentials:"include"})
+.then(res=>res.json())
+.then(files=>{
+let list=document.getElementById("list");
+list.innerHTML="";
+files.forEach(f=>{
+let li=document.createElement("li");
+li.innerHTML=f+` <a href="${API}/download/${f}">Download</a>`;
+list.appendChild(li);
+});
+});
+}
+
+function logout(){
+fetch(API+"/logout",{credentials:"include"})
+.then(()=>window.location="index.html");
+}
+</script>
+
+</body>
+</html>
