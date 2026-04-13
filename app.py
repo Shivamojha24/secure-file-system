@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, send_file, session
-from flask_cors import CORS
+from flask import Flask, request, jsonify, send_file, session, render_template
 import os
 import bcrypt
 import hashlib
@@ -7,8 +6,11 @@ import sqlite3
 from cryptography.fernet import Fernet
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
 app.secret_key = "secret123"
+
+# 🔥 IMPORTANT SESSION FIX
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
 
 UPLOAD_FOLDER = "uploads"
 
@@ -46,11 +48,24 @@ CREATE TABLE IF NOT EXISTS files (
 
 conn.commit()
 
-# ---------- Auth Check ----------
+# ---------- AUTH ----------
 def check_auth():
     return session.get('user')
 
-# ---------- Register ----------
+# ---------- FRONTEND ROUTES ----------
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/register')
+def register_page():
+    return render_template('register.html')
+
+@app.route('/dashboard')
+def dashboard_page():
+    return render_template('dashboard.html')
+
+# ---------- REGISTER ----------
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -64,7 +79,7 @@ def register():
     except:
         return jsonify({"message": "User already exists"}), 400
 
-# ---------- Login ----------
+# ---------- LOGIN ----------
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -80,7 +95,7 @@ def login():
     
     return jsonify({"message": "Invalid credentials"}), 401
 
-# ---------- Upload ----------
+# ---------- UPLOAD ----------
 @app.route('/api/upload', methods=['POST'])
 def upload():
     user = check_auth()
@@ -103,7 +118,7 @@ def upload():
 
     return jsonify({"message": "File uploaded securely"})
 
-# ---------- List Files ----------
+# ---------- FILE LIST ----------
 @app.route('/api/files', methods=['GET'])
 def files():
     user = check_auth()
@@ -114,7 +129,7 @@ def files():
     files = [row[0] for row in cursor.fetchall()]
     return jsonify(files)
 
-# ---------- Download ----------
+# ---------- DOWNLOAD ----------
 @app.route('/api/download/<filename>', methods=['GET'])
 def download(filename):
     user = check_auth()
@@ -149,7 +164,7 @@ def download(filename):
 
     return send_file(temp, as_attachment=True)
 
-# ---------- Logout ----------
+# ---------- LOGOUT ----------
 @app.route('/api/logout')
 def logout():
     session.pop('user', None)

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+</head>
+
+<body style="text-align:center;background:#0f172a;color:white;">
+
+<h2>Login</h2>
+
+<input id="user" placeholder="Username"><br><br>
+<input id="pass" type="password" placeholder="Password"><br><br>
+
+<button onclick="login()">Login</button>
+
+<script>
+function login(){
+
+    let username = document.getElementById("user").value;
+    let password = document.getElementById("pass").value;
+
+    fetch("http://127.0.0.1:5000/api/login",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        credentials:"include",
+        body:JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+
+        if(data.message === "Login success"){
+            window.location.href = "http://127.0.0.1:5000/dashboard";
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Error connecting backend");
+    });
+}
+</script>
+
+</body>
+</html>
