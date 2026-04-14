@@ -5,131 +5,264 @@
 
 <style>
 body{
+    margin:0;
+    font-family:Arial;
     background:#0f172a;
     color:white;
-    text-align:center;
-    font-family:Arial;
 }
 
-.box{
-    width:400px;
-    margin:auto;
-    margin-top:50px;
-    background:#1e293b;
+/* SIDEBAR */
+.sidebar{
+    width:220px;
+    background:#020617;
+    height:100vh;
     padding:20px;
-    border-radius:10px;
+    position:fixed;
+    left:0;
+    top:0;
 }
 
+.sidebar h2{
+    color:#38bdf8;
+}
+
+.sidebar button{
+    width:100%;
+    margin:10px 0;
+    padding:12px;
+    background:#1e293b;
+    border:none;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.sidebar button:hover{
+    background:#334155;
+}
+
+/* MAIN */
+.main{
+    margin-left:240px;
+    padding:30px;
+   
+}
+
+/* CARD */
+.card{
+    background:rgba(30,41,59,0.7);
+    padding:25px;
+    border-radius:15px;
+    width:420px;
+}
+
+/* BUTTON */
 button{
     padding:10px;
-    margin:8px;
+    margin:6px;
     border:none;
-    border-radius:5px;
+    border-radius:8px;
     background:#3b82f6;
     color:white;
     cursor:pointer;
 }
 
-button:hover{
-    background:#2563eb;
-}
-
+/* FILE LIST */
 li{
     background:#334155;
-    margin:5px;
-    padding:8px;
-    border-radius:5px;
+    margin:6px;
+    padding:10px;
+    border-radius:8px;
+    list-style:none;
 }
 
-a{
-    color:#38bdf8;
-    margin-left:10px;
+/* DRAG AREA */
+#dropArea{
+    border:2px dashed #334155;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:10px;
+    cursor:pointer;
+}
+
+/* PROGRESS */
+#progressContainer{
+    width:100%;
+    background:#1e293b;
+    border-radius:6px;
+    display:none;
+}
+
+#progressBar{
+    height:10px;
+    width:0%;
+    background:#22c55e;
+}
+
+/* TOAST */
+#toast{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#22c55e;
+    padding:10px;
+    border-radius:6px;
+    display:none;
 }
 </style>
 
 </head>
+
 <body>
 
-<div class="box">
-    <h2>📂 Dashboard</h2>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>🔐 SecureFS</h2>
 
-    <input type="file" id="file">
-    <br>
-    <button type="button" onclick="upload()">Upload</button>
-
-    <br>
-    <button type="button" onclick="loadFiles()">Load Files</button>
-
-    <ul id="list"></ul>
-
-    <button type="button" onclick="logout()">Logout</button>
+    <button onclick="loadFiles()">📂 Files</button>
+    <button onclick="logout()">🚪 Logout</button>
+    <button onclick="toggleTheme()">🌗 Toggle</button>
 </div>
+
+<!-- MAIN -->
+<div class="main">
+
+<h2>Dashboard</h2>
+
+<div class="card">
+
+<div id="dropArea">Drag & Drop file here</div>
+
+<input type="file" id="file"><br>
+
+<button onclick="upload()">Upload</button>
+
+<div id="progressContainer">
+    <div id="progressBar"></div>
+</div>
+
+<ul id="list"></ul>
+
+</div>
+
+</div>
+
+<div id="toast"></div>
 
 <script>
 
+// MAKE FUNCTIONS GLOBAL (IMPORTANT)
+window.loadFiles = loadFiles;
+window.logout = logout;
+
+// TOAST
+function showToast(msg){
+    let t=document.getElementById("toast");
+    t.innerText=msg;
+    t.style.display="block";
+    setTimeout(()=>{ t.style.display="none"; },2000);
+}
+
+// UPLOAD
 function upload(){
-    let fileInput = document.getElementById("file");
-    let f = fileInput.files[0];
+    let f=document.getElementById("file").files[0];
 
     if(!f){
-        alert("Please select a file first");
+        showToast("Select file first");
         return;
     }
 
-    let form = new FormData();
-    form.append("file", f);
+    let form=new FormData();
+    form.append("file",f);
 
-    fetch("/api/upload", {
-        method: "POST",
-        credentials: "include",
-        body: form
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log(data);
-        alert(data.message);
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Upload failed");
-    });
+    let xhr=new XMLHttpRequest();
+    xhr.open("POST","/api/upload",true);
+    xhr.withCredentials=true;
+
+    let bar=document.getElementById("progressBar");
+    let container=document.getElementById("progressContainer");
+
+    container.style.display="block";
+
+    xhr.upload.onprogress=function(e){
+        if(e.lengthComputable){
+            let percent=(e.loaded/e.total)*100;
+            bar.style.width=percent+"%";
+        }
+    };
+
+    xhr.onload=function(){
+        showToast("Upload complete");
+        bar.style.width="0%";
+        container.style.display="none";
+        loadFiles();
+    };
+
+    xhr.send(form);
 }
 
+// LOAD FILES
 function loadFiles(){
-    fetch("/api/files", {
-        credentials: "include"
-    })
-    .then(res => res.json())
-    .then(files => {
-        let list = document.getElementById("list");
-        list.innerHTML = "";
+    fetch("/api/files",{credentials:"include"})
+    .then(res=>res.json())
+    .then(files=>{
+        let list=document.getElementById("list");
+        list.innerHTML="";
 
-        if(files.length === 0){
-            list.innerHTML = "<li>No files uploaded</li>";
+        if(files.length===0){
+            list.innerHTML="<li>No files</li>";
             return;
         }
 
-        files.forEach(f => {
-            let li = document.createElement("li");
-            li.innerHTML = f + 
-            ` <a href="/api/download/${f}">Download</a>`;
+        files.forEach(f=>{
+            let li=document.createElement("li");
+            li.innerHTML=`📄 ${f} <a href="/api/download/${f}">⬇</a>`;
             list.appendChild(li);
         });
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Failed to load files");
     });
 }
 
+// LOGOUT
 function logout(){
-    fetch("/api/logout", {
-        credentials: "include"
-    })
-    .then(() => {
-       window.location.href = "http://127.0.0.1:5000/";
-    });
+    fetch("/api/logout",{credentials:"include"})
+    .then(()=>window.location.href="/");
 }
+
+// DRAG DROP
+let dropArea=document.getElementById("dropArea");
+let fileInput=document.getElementById("file");
+
+dropArea.onclick=()=>fileInput.click();
+
+dropArea.addEventListener("dragover",e=>{
+    e.preventDefault();
+    dropArea.style.background="#334155";
+});
+
+dropArea.addEventListener("dragleave",()=>{
+    dropArea.style.background="transparent";
+});
+
+dropArea.addEventListener("drop",e=>{
+    e.preventDefault();
+    fileInput.files=e.dataTransfer.files;
+    dropArea.style.background="transparent";
+});
+
+// THEME
+function toggleTheme(){
+    let body=document.body;
+    if(body.style.background==="white"){
+        body.style.background="#0f172a";
+        body.style.color="white";
+    } else {
+        body.style.background="white";
+        body.style.color="black";
+    }
+}
+
+// AUTO LOAD
+loadFiles();
 
 </script>
 

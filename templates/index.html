@@ -1,47 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
+<title>Secure File System</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.card{
+    backdrop-filter:blur(15px);
+    background:rgba(30,41,59,0.6);
+    padding:30px;
+    border-radius:20px;
+    width:320px;
+    text-align:center;
+    box-shadow:0 0 30px rgba(0,0,0,0.6);
+    animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    border-radius:8px;
+    background:#0f172a;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(45deg,#3b82f6,#06b6d4);
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.secondary{
+    background:#475569;
+}
+</style>
+
 </head>
 
-<body style="text-align:center;background:#0f172a;color:white;">
+<body>
 
-<h2>Login</h2>
+<div class="card">
+    <h2>🔐 Secure File</h2>
 
-<input id="user" placeholder="Username"><br><br>
-<input id="pass" type="password" placeholder="Password"><br><br>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
 
-<button onclick="login()">Login</button>
+    <button onclick="login()">Login</button>
+    <button class="secondary" onclick="goRegister()">Register</button>
+</div>
 
 <script>
 function login(){
-
     let username = document.getElementById("user").value;
     let password = document.getElementById("pass").value;
 
-    fetch("http://127.0.0.1:5000/api/login",{
+    fetch("/api/login",{
         method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
+        headers:{"Content-Type":"application/json"},
         credentials:"include",
-        body:JSON.stringify({
-            username: username,
-            password: password
-        })
+        body:JSON.stringify({username,password})
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(res=>res.json())
+    .then(data=>{
         alert(data.message);
-
-        if(data.message === "Login success"){
-            window.location.href = "http://127.0.0.1:5000/dashboard";
+        if(data.message==="Login success"){
+            window.location.href="/dashboard";
         }
-    })
-    .catch(err => {
-        console.log(err);
-        alert("Error connecting backend");
     });
+}
+
+function goRegister(){
+    window.location.href="/register";
 }
 </script>
 

@@ -8,7 +8,6 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 app.secret_key = "secret123"
 
-# 🔥 IMPORTANT SESSION FIX
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
 
@@ -48,14 +47,14 @@ CREATE TABLE IF NOT EXISTS files (
 
 conn.commit()
 
-# ---------- AUTH ----------
 def check_auth():
     return session.get('user')
 
-# ---------- FRONTEND ROUTES ----------
+# ---------- ROUTES ----------
+
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html')   # LOGIN PAGE
 
 @app.route('/register')
 def register_page():
@@ -63,9 +62,12 @@ def register_page():
 
 @app.route('/dashboard')
 def dashboard_page():
+    if 'user' not in session:
+        return render_template('index.html')
     return render_template('dashboard.html')
 
-# ---------- REGISTER ----------
+# ---------- API ----------
+
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -79,7 +81,7 @@ def register():
     except:
         return jsonify({"message": "User already exists"}), 400
 
-# ---------- LOGIN ----------
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -95,7 +97,7 @@ def login():
     
     return jsonify({"message": "Invalid credentials"}), 401
 
-# ---------- UPLOAD ----------
+
 @app.route('/api/upload', methods=['POST'])
 def upload():
     user = check_auth()
@@ -118,7 +120,7 @@ def upload():
 
     return jsonify({"message": "File uploaded securely"})
 
-# ---------- FILE LIST ----------
+
 @app.route('/api/files', methods=['GET'])
 def files():
     user = check_auth()
@@ -129,7 +131,7 @@ def files():
     files = [row[0] for row in cursor.fetchall()]
     return jsonify(files)
 
-# ---------- DOWNLOAD ----------
+
 @app.route('/api/download/<filename>', methods=['GET'])
 def download(filename):
     user = check_auth()
@@ -164,11 +166,12 @@ def download(filename):
 
     return send_file(temp, as_attachment=True)
 
-# ---------- LOGOUT ----------
+
 @app.route('/api/logout')
 def logout():
     session.pop('user', None)
     return jsonify({"message": "Logged out"})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
