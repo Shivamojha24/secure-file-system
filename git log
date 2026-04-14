@@ -1,0 +1,11 @@
+[33m3b34f28[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Added gitignore to protect sensitive files
+[33m401c4d4[m Removed sensitive key file
+[33mad1232a[m Enhanced UI of dashboard and added file upload improvements
+[33m204216b[m[33m ([m[1;31morigin/feature-ui[m[33m, [m[1;32mfeature-ui[m[33m)[m UI improvements in branch
+[33mc9a3ea6[m Added access control and security
+[33mb73af2c[m Implemented file encryption
+[33mfdfb3ef[m Added authentication system
+[33m287e371[m Implemented backend with Flask
+[33ma1e534b[m Added frontend UI design
+[33mb12d5b6[m Updated project structure to templates and fixed UI & session
+[33me6def9d[m first commit
