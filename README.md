@@ -54,7 +54,7 @@ secure-file-system/
 ├── uploads/
 
 
-## ▶️ How to Run
+## How to Run
 1. Clone the repository  
 2. Install dependencies:
 pip install -r requirements.txt
@@ -71,5 +71,5 @@ http://127.0.0.1:5000
 - The encryption key is generated automatically when the server starts.
 - Make sure not to share the key file publicly.
 
-## 👨‍💻 Author
+## Author
 Shivam Kumar Ojha
