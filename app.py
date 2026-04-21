@@ -166,7 +166,34 @@ def download(filename):
 
     return send_file(temp, as_attachment=True)
 
+# ---------- ADMIN STATS API ----------
 
+@app.route('/api/user_count')
+def user_count():
+    user = check_auth()
+    if not user:
+        return jsonify({"message": "Login required"}), 401
+
+    if user != "admin":
+        return jsonify({"message": "Unauthorized"}), 403
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+    return jsonify({"users": count})
+
+
+@app.route('/api/file_count')
+def file_count():
+    user = check_auth()
+    if not user:
+        return jsonify({"message": "Login required"}), 401
+
+    if user != "admin":
+        return jsonify({"message": "Unauthorized"}), 403
+
+    cursor.execute("SELECT COUNT(*) FROM files")
+    count = cursor.fetchone()[0]
+    return jsonify({"files": count})
 @app.route('/api/logout')
 def logout():
     session.pop('user', None)

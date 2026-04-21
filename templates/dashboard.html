@@ -45,7 +45,6 @@ body{
 .main{
     margin-left:240px;
     padding:30px;
-   
 }
 
 /* CARD */
@@ -129,6 +128,12 @@ li{
 
 <h2>Dashboard</h2>
 
+<!-- 🔥 ADMIN STATS -->
+<div id="statsSection" style="margin-bottom:20px;">
+    <h3>👤 Users: <span id="userCount">0</span></h3>
+    <h3>📁 Files: <span id="fileCount">0</span></h3>
+</div>
+
 <div class="card">
 
 <div id="dropArea">Drag & Drop file here</div>
@@ -150,10 +155,6 @@ li{
 <div id="toast"></div>
 
 <script>
-
-// MAKE FUNCTIONS GLOBAL (IMPORTANT)
-window.loadFiles = loadFiles;
-window.logout = logout;
 
 // TOAST
 function showToast(msg){
@@ -261,8 +262,40 @@ function toggleTheme(){
     }
 }
 
+// 🔥 ADMIN STATS LOAD
+function loadStats(){
+
+    fetch("/api/user_count",{credentials:"include"})
+    .then(res=>{
+        if(res.status===403){
+            document.getElementById("statsSection").style.display="none";
+            return null;
+        }
+        return res.json();
+    })
+    .then(data=>{
+        if(data){
+            document.getElementById("userCount").innerText=data.users;
+        }
+    });
+
+    fetch("/api/file_count",{credentials:"include"})
+    .then(res=>{
+        if(res.status===403){
+            return null;
+        }
+        return res.json();
+    })
+    .then(data=>{
+        if(data){
+            document.getElementById("fileCount").innerText=data.files;
+        }
+    });
+}
+
 // AUTO LOAD
 loadFiles();
+loadStats();
 
 </script>
 
