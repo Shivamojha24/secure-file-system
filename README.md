@@ -66,6 +66,8 @@ python app.py
 
 4. Open in browser:
 http://127.0.0.1:5000
+5.live on render:
+https://secure-file-system-w0t0.onrender.com
 
 ##  Note
 - The encryption key is generated automatically when the server starts.
